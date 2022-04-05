@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset=utf-8>
+<meta name="viewport" content="width=320">
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>PHP/MySQL & Google Maps- London Expert </title>
+  
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>  
+	
+  <!-- <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script> -->
+  <!-- <script src="https://maps.googleapis.com/maps/api/js?key="></script> -->
+
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=KEY"
+    ></script> 
+    
+	<script type="text/javascript">
+    //<![CDATA[
+	
+	var myLocation=new google.maps.LatLng(47.6145, -122.3418);
+	  
+
+    var customIcons = {
+      specialdefault: {
+        icon: 'http://labs.google.com/ridefinder/images/mm_20_red.png'
+      }
+    };
+
+    function load() {
+      var map = new google.maps.Map(document.getElementById("map"), {
+        center: new google.maps.LatLng(47.6145, -122.3418),
+        zoom: 13,
+        mapTypeId: 'roadmap'
+      });
+      var infoWindow = new google.maps.InfoWindow;
+
+      downloadUrl("phpsqlajax_genxml.php", function(data) {
+        var xml = data.responseXML;
+        var markers = xml.documentElement.getElementsByTagName("marker");
+        for (var i = 0; i < markers.length; i++) {
+          
+          var idj = markers[i].getAttribute("idj");
+          
+          //var fullPath = document.getElementById('3').value;
+          //var fullPath = document.getElementById('3').files[0];
+
+          //var jfile = markers[i].getAttribute("idj");
+          
+
+          
+          var name = markers[i].getAttribute("name");
+          var address = markers[i].getAttribute("address");
+          var type = markers[i].getAttribute("type");
+		  
+          var pic = markers[i].getAttribute("pic");
+
+          var latj = parseFloat(markers[i].getAttribute("lat"));
+          var lngj = parseFloat(markers[i].getAttribute("lng"));
+          
+          var point = new google.maps.LatLng(
+              parseFloat(markers[i].getAttribute("lat")),
+              parseFloat(markers[i].getAttribute("lng")));
+          //var html = "<b>" + name + "</b> <br/>" + address;
+          /*
+          var html = "<p>"+ name +"</p>" + "<img border='0' src=" + pic + " alt='' width='40' height='30'>"+"<p>"+address+"</p>"+
+          '<form action="upload.php" method="post" enctype="multipart/form-data"><input type="file" onchange="myFunction()" name="file" id="'+ jfile +'"><br><input type="submit" name="submit" value="changephoto"></form>';
+		      */
+		      //var htmlMyLocation = "<p>Jonny</p>"+"<img border='0' src=" + "Null.jpg" + " alt='' width='40' height='30'>";
+
+          var html = "<p>"+ name +"</p>" + "<img border='0' src=" + pic + " alt='' width='300' height='200'>"+"<p>"+address+"</p>"+
+          '<form action="changepic.php" method="post" enctype="multipart/form-data"><input style="display:none;" type="text" id="sqlid" name="sqlid" value = "'+ idj+ '"><input style="display:none;" type="text" id="nameofplace" name="nameofplace" value = "'+name+ '"><input style="display:none;" type="text" id="addressofplace" name="addressofplace" value="'+ address+'"><input style="display:none;" type="text" id="specialdefault" name="specialdefault" value="specialdefault"><input style="display:none;" type="text" id="x" name="lat" value="'+latj+ '"><input style="display:none;" type="text" id="y" name="lng" value="'+lngj+ '"><input type="file" name="file" id="file"><input type="submit" name="submit" value="changepic"></form>';
+
+          //var postjfile = this.j
+
+          var icon = customIcons[type] || {};
+          var marker = new google.maps.Marker({
+            map: map,
+            position: point,
+            icon: icon.icon
+          });
+          bindInfoWindow(marker, map, infoWindow, html);
+        }
+      });
+    }
+
+    function bindInfoWindow(marker, map, infoWindow, html) {
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(html);
+        infoWindow.open(map, marker);
+      });
+    }
+
+    function downloadUrl(url, callback) {
+      var request = window.ActiveXObject ?
+          new ActiveXObject('Microsoft.XMLHTTP') :
+          new XMLHttpRequest;
+
+      request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+          request.onreadystatechange = doNothing;
+          callback(request, request.status);
+        }
+      };
+
+      request.open('GET', url, true);
+      request.send(null);
+    }
+
+    function doNothing() {}
+
+    //]]>
+
+  </script>
+  
+     <style>
+      <!--
+	  html, body, #map {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+	  -->
+    <!--Full Screen -->
+    </style>
+  
+  </head>
+
+  <body onload="load()">
+    <div id="map" style="width: center; height: 600px;"></div>
+
+<h1>Add a Point with pic on the map</h1>
+    <form action="upload.php" method="post"
+enctype="multipart/form-data">
+
+<p>Name of Place</p>
+<input type="text" id="nameofplace" name="nameofplace" required>
+<br>
+
+<p>Address</p>
+<input type="text" id="addressofplace" name="addressofplace" required>
+<br>
+
+<p>Deflaut(Don't change this value)</p>
+<input type="text" id="specialdefault" name="specialdefault" value="specialdefault" required>
+<br>
+
+<p>x</p>
+<input type="number" min="47.606365" max="47.630000" id="x" name="lat" pattern="[0-9]+([\.|,][0-9]+)?" step="0.000001"
+            title="This should be a number with up to 6 decimal places ranging from. 47.606365 to 47.630000">
+
+<p>y</p>
+<input type="number" min="-122.350000" max="-122.337654" id="y" name="lng" pattern="[0-9]+([\.|,][0-9]+)?" step="0.000001"
+            title="This should be a number with up to 6 decimal places. ranging from. -122.337654 to -122.350000">
+
+<br>
+
+<label for="file">Upload Photo:</label>
+<input type="file" name="file" id="file">
+<br>
+<input type="submit" name="submit" value="Submit">
+</form>
+
+
+  </body>
+
+</html>
